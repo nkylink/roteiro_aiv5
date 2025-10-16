@@ -157,6 +157,17 @@ h2 {
   border-radius: 3px;
   padding: 10px;
   margin-bottom: 12px;
+  display: flex;
+  gap: 6px;
+  position: relative;
+}
+
+.scene-box > div:not(.scene-controls) {
+  flex: 1;
+}
+
+.scene-content {
+  flex: 1;
 }
 
 .scene-header {
@@ -862,4 +873,78 @@ h2 {
   border: 1px solid #333333;
   border-radius: 3px;
   margin-top: 12px;
+}
+
+.scene-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-right: 4px;
+}
+
+.scene-control-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background-color: #1a1a1a;
+  color: #666666;
+  border: 1px solid #222222;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 0.75em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.scene-control-btn:hover:not(:disabled) {
+  background-color: #2a2a2a;
+  color: #c9c9c9;
+  border-color: #333333;
+}
+
+.scene-control-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.scene-control-btn.add-scene-ctrl {
+  color: #888888;
+  font-size: 0.7em;
+}
+
+.voice-toggle-button {
+  width: 100%;
+  padding: 8px;
+  margin-top: 12px;
+  background-color: #1a1a1a;
+  border: 1px solid #333333;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 1.2em;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.voice-toggle-button.enabled {
+  background-color: #0a2a0a;
+  border-color: #1a5d1a;
+  color: #44ff44;
+}
+
+.voice-toggle-button.disabled {
+  background-color: #2a0a0a;
+  border-color: #5d1a1a;
+  color: #ff4444;
+}
+
+.voice-toggle-button:hover {
+  opacity: 0.8;
+}
+
+.organize-button {
+  white-space: nowrap;
 }

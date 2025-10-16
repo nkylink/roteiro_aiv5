@@ -32,9 +32,10 @@ interface DialogueBoxProps {
   onStopCharacterRec: (sceneId: string, dialogueId: string) => void;
   isListening: boolean;
   isCharacterListening: boolean;
+  voiceButtonsEnabled: boolean;
 }
 
-const DialogueBox: React.FC<DialogueBoxProps> = ({ dialogue, sceneId, onDialogueChange, onDeleteDialogue, onStartDialogueRec, onStopDialogueRec, onStartCharacterRec, onStopCharacterRec, isListening, isCharacterListening }) => (
+const DialogueBox: React.FC<DialogueBoxProps> = ({ dialogue, sceneId, onDialogueChange, onDeleteDialogue, onStartDialogueRec, onStopDialogueRec, onStartCharacterRec, onStopCharacterRec, isListening, isCharacterListening, voiceButtonsEnabled }) => (
   <div className="dialogue-box">
     <div className="dialogue-inputs-compact">
       <div className="dialogue-character-container">
@@ -44,7 +45,7 @@ const DialogueBox: React.FC<DialogueBoxProps> = ({ dialogue, sceneId, onDialogue
           value={dialogue.character}
           onChange={(e) => onDialogueChange(sceneId, dialogue.id, 'character', e.target.value.toUpperCase())}
         />
-        {isCharacterListening ? (
+        {voiceButtonsEnabled && (isCharacterListening ? (
           <button
             className="dialogue-voice-button recording"
             onClick={() => onStopCharacterRec(sceneId, dialogue.id)}
@@ -60,7 +61,7 @@ const DialogueBox: React.FC<DialogueBoxProps> = ({ dialogue, sceneId, onDialogue
           >
             🔴
           </button>
-        )}
+        ))}
       </div>
       <div className="dialogue-line-container">
         <textarea
@@ -68,7 +69,7 @@ const DialogueBox: React.FC<DialogueBoxProps> = ({ dialogue, sceneId, onDialogue
           value={dialogue.line}
           onChange={(e) => onDialogueChange(sceneId, dialogue.id, 'line', e.target.value)}
         />
-        {isListening ? (
+        {voiceButtonsEnabled && (isListening ? (
           <button
             className="dialogue-voice-button recording"
             onClick={() => onStopDialogueRec(sceneId, dialogue.id)}
@@ -84,7 +85,7 @@ const DialogueBox: React.FC<DialogueBoxProps> = ({ dialogue, sceneId, onDialogue
           >
             🔴
           </button>
-        )}
+        ))}
       </div>
     </div>
     <button
@@ -101,6 +102,7 @@ const DialogueBox: React.FC<DialogueBoxProps> = ({ dialogue, sceneId, onDialogue
 interface SceneBoxProps {
   scene: Scene;
   index: number;
+  totalScenes: number;
   onContentChange: (id: string, newContent: string) => void;
   onDelete: (id: string) => void;
   onAddDialogue: (sceneId: string) => void;
@@ -112,11 +114,17 @@ interface SceneBoxProps {
   onStopDialogueRec: (sceneId: string, dialogueId: string) => void;
   onStartCharacterRec: (sceneId: string, dialogueId: string) => void;
   onStopCharacterRec: (sceneId: string, dialogueId: string) => void;
+  onMoveUp: (index: number) => void;
+  onMoveDown: (index: number) => void;
+  onAddSceneAbove: (index: number) => void;
+  onAddSceneBelow: (index: number) => void;
+  voiceButtonsEnabled: boolean;
 }
 
 const SceneBox: React.FC<SceneBoxProps> = ({
   scene,
   index,
+  totalScenes,
   onContentChange,
   onDelete,
   onAddDialogue,
@@ -128,69 +136,109 @@ const SceneBox: React.FC<SceneBoxProps> = ({
   onStopDialogueRec,
   onStartCharacterRec,
   onStopCharacterRec,
+  onMoveUp,
+  onMoveDown,
+  onAddSceneAbove,
+  onAddSceneBelow,
+  voiceButtonsEnabled,
 }) => {
   return (
     <div className="scene-box" data-scene-id={scene.id}>
-      <header className="scene-header">
-        <span className="scene-index">{index + 1}</span>
-        <div className="scene-actions">
-          {scene.listening ? (
-            <button
-              className="voice-button recording"
-              onClick={() => onStopRec(scene.id)}
-              title="Parar gravação"
-            >
-              ⏹
-            </button>
-          ) : (
-            <button
-              className="voice-button"
-              onClick={() => onStartRec(scene.id)}
-              title="Gravar cena"
-            >
-              🔴
-            </button>
-          )}
+      <div className="scene-controls">
+        <button
+          className="scene-control-btn"
+          onClick={() => onMoveUp(index)}
+          disabled={index === 0}
+          title="Mover cena para cima"
+        >
+          ↑
+        </button>
+        <button
+          className="scene-control-btn"
+          onClick={() => onMoveDown(index)}
+          disabled={index === totalScenes - 1}
+          title="Mover cena para baixo"
+        >
+          ↓
+        </button>
+        <button
+          className="scene-control-btn add-scene-ctrl"
+          onClick={() => onAddSceneAbove(index)}
+          title="Adicionar cena acima"
+        >
+          +↑
+        </button>
+        <button
+          className="scene-control-btn add-scene-ctrl"
+          onClick={() => onAddSceneBelow(index)}
+          title="Adicionar cena abaixo"
+        >
+          +↓
+        </button>
+      </div>
+      <div className="scene-content">
+        <header className="scene-header">
+          <span className="scene-index">{index + 1}</span>
+          <div className="scene-actions">
+            {voiceButtonsEnabled && (scene.listening ? (
+              <button
+                className="voice-button recording"
+                onClick={() => onStopRec(scene.id)}
+                title="Parar gravação"
+              >
+                ⏹
+              </button>
+            ) : (
+              <button
+                className="voice-button"
+                onClick={() => onStartRec(scene.id)}
+                title="Gravar cena"
+              >
+                🔴
+              </button>
+            ))}
 
-          <button
-            className="add-dialogue-button"
-            onClick={() => onAddDialogue(scene.id)}
-            title="Adicionar Fala"
-          >
-            Fala
-          </button>
-          <button
-            className="delete-button"
-            onClick={() => onDelete(scene.id)}
-            title="Deletar Cena"
-          >
-            ×
-          </button>
+            <button
+              className="add-dialogue-button"
+              onClick={() => onAddDialogue(scene.id)}
+              title="Adicionar Fala"
+            >
+              Fala
+            </button>
+            <button
+              className="delete-button"
+              onClick={() => onDelete(scene.id)}
+              title="Deletar Cena"
+            >
+              ×
+            </button>
+          </div>
+        </header>
+
+        <textarea
+          className="scene-textarea scene-action-input"
+          value={scene.content}
+          onChange={(e) => onContentChange(scene.id, e.target.value)}
+        />
+
+        <div className="dialogue-list">
+          {scene.dialogues.map((dialogue) => (
+            <DialogueBox
+              key={dialogue.id}
+              dialogue={dialogue}
+              sceneId={scene.id}
+              onDialogueChange={onDialogueChange}
+              onDeleteDialogue={onDeleteDialogue}
+              onStartDialogueRec={onStartDialogueRec}
+              onStopDialogueRec={onStopDialogueRec}
+              onStartCharacterRec={onStartCharacterRec}
+              onStopCharacterRec={onStopCharacterRec}
+              isListening={scene.activeDialogueId === dialogue.id}
+              isCharacterListening={scene.activeCharacterDialogueId === dialogue.id}
+              voiceButtonsEnabled={voiceButtonsEnabled}
+            />
+          ))}
         </div>
-      </header>
-
-      <textarea
-        className="scene-textarea scene-action-input"
-        value={scene.content}
-        onChange={(e) => onContentChange(scene.id, e.target.value)}
-      />
-
-      <div className="dialogue-list">
-        {scene.dialogues.map((dialogue) => (
-          <DialogueBox
-            key={dialogue.id}
-            dialogue={dialogue}
-            sceneId={scene.id}
-            onDialogueChange={onDialogueChange}
-            onDeleteDialogue={onDeleteDialogue}
-            onStartDialogueRec={onStartDialogueRec}
-            onStopDialogueRec={onStopDialogueRec}
-            onStartCharacterRec={onStartCharacterRec}
-            onStopCharacterRec={onStopCharacterRec}
-            isListening={scene.activeDialogueId === dialogue.id}
-            isCharacterListening={scene.activeCharacterDialogueId === dialogue.id}
-          />
-        ))}
       </div>
     </div>
   );
@@ -209,6 +257,7 @@ const App: React.FC = () => {
   const [newIdea, setNewIdea] = useState<string>('');
   const [savedScripts, setSavedScripts] = useState<Array<{name: string, data: any}>>([]);
   const [newScriptName, setNewScriptName] = useState<string>('');
+  const [voiceButtonsEnabled, setVoiceButtonsEnabled] = useState<boolean>(true);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const activeSceneRef = useRef<string | null>(null);
   const dialogueRecognitionRef = useRef<SpeechRecognition | null>(null);
@@ -766,6 +815,121 @@ const App: React.FC = () => {
     }
   };
 
+  const moveSceneUp = (index: number) => {
+    if (index === 0) return;
+    setScenes((prev) => {
+      const newScenes = [...prev];
+      [newScenes[index - 1], newScenes[index]] = [newScenes[index], newScenes[index - 1]];
+      return newScenes;
+    });
+  };
+
+  const moveSceneDown = (index: number) => {
+    if (index === scenes.length - 1) return;
+    setScenes((prev) => {
+      const newScenes = [...prev];
+      [newScenes[index], newScenes[index + 1]] = [newScenes[index + 1], newScenes[index]];
+      return newScenes;
+    });
+  };
+
+  const addSceneAbove = (index: number) => {
+    const newScene: Scene = { id: generateId(), content: '', dialogues: [] };
+    setScenes((prev) => {
+      const newScenes = [...prev];
+      newScenes.splice(index, 0, newScene);
+      return newScenes;
+    });
+  };
+
+  const addSceneBelow = (index: number) => {
+    const newScene: Scene = { id: generateId(), content: '', dialogues: [] };
+    setScenes((prev) => {
+      const newScenes = [...prev];
+      newScenes.splice(index + 1, 0, newScene);
+      return newScenes;
+    });
+  };
+
+  const organizeDialoguesByCharacter = () => {
+    const allDialogues: Array<{ sceneIndex: number; dialogue: Dialogue }> = [];
+    scenes.forEach((scene, sceneIndex) => {
+      scene.dialogues.forEach((dialogue) => {
+        if (dialogue.character.trim() || dialogue.line.trim()) {
+          allDialogues.push({ sceneIndex: sceneIndex + 1, dialogue });
+        }
+      });
+    });
+
+    allDialogues.sort((a, b) => {
+      if (a.dialogue.character === b.dialogue.character) {
+        return 0;
+      }
+      return a.dialogue.character.localeCompare(b.dialogue.character);
+    });
+
+    let output = '';
+    let lastCharacter = '';
+    allDialogues.forEach(({ sceneIndex, dialogue }) => {
+      if (dialogue.character !== lastCharacter) {
+        if (output) output += '\n';
+        output += `${dialogue.character.trim().toUpperCase() || 'SEM PERSONAGEM'}\n`;
+        lastCharacter = dialogue.character;
+      }
+      output += `Cena ${sceneIndex}: ${dialogue.line.trim()}\n`;
+    });
+
+    return output;
+  };
+
+  const translateOrganizedDialogues = async () => {
+    setIsTranslating(true);
+    try {
+      const textToTranslate = organizeDialoguesByCharacter();
+
+      const chunkSize = 400;
+      const lines = textToTranslate.split('\n');
+      const chunks: string[] = [];
+      let currentChunk = '';
+
+      for (const line of lines) {
+        if ((currentChunk + line + '\n').length > chunkSize && currentChunk) {
+          chunks.push(currentChunk.trim());
+          currentChunk = line + '\n';
+        } else {
+          currentChunk += line + '\n';
+        }
+      }
+
+      if (currentChunk.trim()) {
+        chunks.push(currentChunk.trim());
+      }
+
+      const translatedChunks: string[] = [];
+
+      for (const chunk of chunks) {
+        const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunk)}&langpair=pt|es`);
+        const data = await response.json();
+
+        if (data.responseData && data.responseData.translatedText) {
+          translatedChunks.push(data.responseData.translatedText);
+        } else {
+          throw new Error('Erro ao traduzir chunk');
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+
+      return translatedChunks.join('\n');
+    } catch (error) {
+      console.error('Erro na tradução:', error);
+      alert('Erro ao traduzir');
+      return '';
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
   useEffect(() => {
     return () => {
       if (holdTimerRef.current) {
@@ -791,6 +955,13 @@ const App: React.FC = () => {
             <div className="info-section">
               <p>Cenas: <strong>{scenes.length}</strong></p>
               <p>Falas: <strong>{scenes.reduce((sum, scene) => sum + scene.dialogues.length, 0)}</strong></p>
+              <button
+                className={`voice-toggle-button ${voiceButtonsEnabled ? 'enabled' : 'disabled'}`}
+                onClick={() => setVoiceButtonsEnabled(!voiceButtonsEnabled)}
+                title={voiceButtonsEnabled ? 'Desativar gravação de voz' : 'Ativar gravação de voz'}
+              >
+                {voiceButtonsEnabled ? '🔴' : '⭕'}
+              </button>
             </div>
 
             <div className="counter-section">
@@ -918,6 +1089,7 @@ const App: React.FC = () => {
             key={scene.id}
             scene={scene}
             index={index}
+            totalScenes={scenes.length}
             onContentChange={handleContentChange}
             onDelete={deleteScene}
             onAddDialogue={addDialogue}
@@ -929,6 +1101,11 @@ const App: React.FC = () => {
             onStopDialogueRec={stopDialogueRec}
             onStartCharacterRec={startCharacterRec}
             onStopCharacterRec={stopCharacterRec}
+            onMoveUp={moveSceneUp}
+            onMoveDown={moveSceneDown}
+            onAddSceneAbove={addSceneAbove}
+            onAddSceneBelow={addSceneBelow}
+            voiceButtonsEnabled={voiceButtonsEnabled}
           />
         ))}
         <button className="add-scene-button" onClick={addScene}>
@@ -1015,6 +1192,19 @@ const App: React.FC = () => {
                       disabled={isTranslating || scenes.length === 0}
                     >
                       {isTranslating ? 'Traduzindo...' : 'Traduzir'}
+                    </button>
+                    <button
+                      className="translate-button organize-button"
+                      onClick={async () => {
+                        const organized = organizeDialoguesByCharacter();
+                        const translated = await translateOrganizedDialogues();
+                        if (translated) {
+                          navigator.clipboard.writeText(translated);
+                        }
+                      }}
+                      disabled={isTranslating || scenes.length === 0}
+                    >
+                      {isTranslating ? 'Organizando...' : 'Organizar e Copiar (ES)'}
                     </button>
                     {translatedDialogues && (
                       <button className="translate-button" onClick={() => navigator.clipboard.writeText(translatedDialogues.split('\n').filter(line => line.trim().startsWith('-')).map(line => line.replace('-', '').trim()).join('\n'))}>
